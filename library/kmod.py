@@ -86,10 +86,9 @@ def run_module():
         module.fail_json(msg=f'{module.params["state"]} is not a valid state for this module.', **result)
 
     loaded_mods = [ line.split()[0] for line in subprocess.run('lsmod', shell=True, capture_output=True).stdout.decode().splitlines()[1:] ]
-    result['message'] = str(loaded_mods)
 
     if module.params['state'] == 'loaded' and module.params['name'] not in loaded_mods:
-        process = subprocess.run(['modprobe', '--dry-run', module.params['name']], capture_output=True, text=True)
+        process = subprocess.run(['modprobe', module.params['name']], capture_output=True, text=True)
         # ONLY FAIL THE MODULE IF THE MODULE FAILS TO LOAD
         if process.returncode != 0:
             module.fail_json(msg=f'{process.stderr}')
@@ -98,7 +97,7 @@ def run_module():
             mods_changed = True
 
     if module.params['state'] == 'unloaded' and module.params['name'] in loaded_mods:
-        process = subprocess.run(['modprobe', '--dry-run', '--remove', module.params['name']], capture_output=True, text=True)
+        process = subprocess.run(['modprobe', '--remove', module.params['name']], capture_output=True, text=True)
         # ONLY FAIL THE MODULE IF THE MODULE FAILS TO UNLOAD
         if process.returncode != 0:
             module.fail_json(msg=f'{process.stderr}')
